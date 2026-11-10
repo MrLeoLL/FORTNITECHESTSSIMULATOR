@@ -105,7 +105,7 @@ for (const prize of prizes) {
 }
 
 // Sorteio de um único resultado por baú: cada prêmio ocupa uma faixa
-// de probabilidade exclusiva; todo o restante corresponde a "Nada".
+// de probabilidade exclusiva; todo o restante corresponde a "Nothing".
 function renderAcquisitions() {
   acquiredRows.replaceChildren();
   if (!acquisitions.length) {
@@ -175,7 +175,7 @@ function openChest() {
     history.unshift('🎉 ' + won.name);
   } else {
     result.textContent = 'Nothing this time... Try again!';
-    history.unshift('Nada');
+    history.unshift('Nothing');
   }
 
   history = history.slice(0, 8);
