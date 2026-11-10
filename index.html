@@ -8,7 +8,18 @@
 :root{color-scheme:dark;--bg:#111;--panel:#1d1d1d;--line:#303030;--muted:#aaa;--white:#f7f7f7}
 *{box-sizing:border-box}
 body{margin:0;padding:24px;background:var(--bg);color:var(--white);font-family:Arial,Helvetica,sans-serif}
-main{max-width:820px;margin:0 auto}
+main{max-width:1180px;margin:0 auto}
+.top-layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(280px,.85fr);gap:18px;align-items:start}
+.acquired-panel{overflow:hidden;border-radius:18px;background:var(--panel);border:1px solid #242424;box-shadow:0 10px 30px #0005}
+.acquired-header{padding:18px 20px 14px;border-bottom:1px solid var(--line);font-weight:800;font-size:18px}
+.acquired-table{width:100%;border-collapse:collapse;font-size:13px}
+.acquired-table th,.acquired-table td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
+.acquired-table th{color:#aaa;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+.acquired-table tr:last-child td{border-bottom:0}
+.empty-cell{color:#999;text-align:center!important;padding:22px 12px!important}
+.chest-number{font-weight:800;color:#f5c84b;white-space:nowrap}
+.acquired-name{font-weight:700}
+@media(max-width:760px){.top-layout{grid-template-columns:1fr}}
 .panel{overflow:hidden;border-radius:18px;background:var(--panel);border:1px solid #242424;box-shadow:0 10px 30px #0005}
 .header{padding:18px 20px 14px;border-bottom:1px solid var(--line)}
 .heading{font-weight:800;font-size:18px;letter-spacing:.2px}
@@ -39,6 +50,7 @@ button:disabled{opacity:.65;cursor:wait}
 </head>
 <body>
 <main>
+  <div class="top-layout">
   <section class="panel">
     <header class="header">
       <div class="heading"><span class="dot"></span>LIVE PIRATE PRIZE ODDS</div>
@@ -46,6 +58,14 @@ button:disabled{opacity:.65;cursor:wait}
     </header>
     <div id="items"></div>
   </section>
+  <section class="acquired-panel">
+    <header class="acquired-header">PRIZE ACQUISITIONS</header>
+    <table class="acquired-table">
+      <thead><tr><th>Prize</th><th>Chest #</th></tr></thead>
+      <tbody id="acquiredRows"><tr><td colspan="2" class="empty-cell">No prizes obtained yet.</td></tr></tbody>
+    </table>
+  </section>
+  </div>
   <div class="controls">
     <button id="openBtn" type="button">OPEN CHEST</button>
     <span class="counter">Chests opened: <strong id="opened">0</strong></span>
@@ -59,7 +79,9 @@ const list = document.getElementById('items');
 const result = document.getElementById('result');
 const openedEl = document.getElementById('opened');
 const historyEl = document.getElementById('history');
+const acquiredRows = document.getElementById('acquiredRows');
 let opened = 0;
+let acquisitions = [];
 let history = [];
 const obtained = new Set();
 const rowByPrize = new Map();
@@ -84,6 +106,31 @@ for (const prize of prizes) {
 
 // Sorteio de um único resultado por baú: cada prêmio ocupa uma faixa
 // de probabilidade exclusiva; todo o restante corresponde a "Nada".
+function renderAcquisitions() {
+  acquiredRows.replaceChildren();
+  if (!acquisitions.length) {
+    const row = document.createElement('tr');
+    const cell = document.createElement('td');
+    cell.colSpan = 2;
+    cell.className = 'empty-cell';
+    cell.textContent = 'No prizes obtained yet.';
+    row.append(cell);
+    acquiredRows.append(row);
+    return;
+  }
+  for (const acquisition of acquisitions) {
+    const row = document.createElement('tr');
+    const name = document.createElement('td');
+    name.className = 'acquired-name';
+    name.textContent = acquisition.name;
+    const chest = document.createElement('td');
+    chest.className = 'chest-number';
+    chest.textContent = '#' + acquisition.chest.toLocaleString('en-US');
+    row.append(name, chest);
+    acquiredRows.append(row);
+  }
+}
+
 function openChest() {
   const roll = Math.random();
   let cumulative = 0;
@@ -111,6 +158,8 @@ function openChest() {
       obtained.add(won.name);
       rowByPrize.get(won.name)?.classList.add('obtained');
     }
+    acquisitions.unshift({name: won.name, chest: opened});
+    renderAcquisitions();
     const image = document.createElement('img');
     image.src = won.image;
     image.alt = '';
