@@ -10,7 +10,7 @@
 body{margin:0;padding:24px;background:var(--bg);color:var(--white);font-family:Arial,Helvetica,sans-serif}
 main{max-width:1180px;margin:0 auto}
 .top-layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(280px,.85fr);gap:18px;align-items:start}
-.acquired-panel{overflow:hidden;border-radius:18px;background:var(--panel);border:1px solid #242424;box-shadow:0 10px 30px #0005}
+.acquired-panel{height:100%;min-height:440px;overflow:hidden;border-radius:18px;background:var(--panel);border:1px solid #242424;box-shadow:0 10px 30px #0005}
 .acquired-header{padding:18px 20px 14px;border-bottom:1px solid var(--line);font-weight:800;font-size:18px}
 .acquired-table{width:100%;border-collapse:collapse;font-size:13px}
 .acquired-table th,.acquired-table td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
@@ -105,7 +105,7 @@ for (const prize of prizes) {
 }
 
 // Sorteio de um único resultado por baú: cada prêmio ocupa uma faixa
-// de probabilidade exclusiva; todo o restante corresponde a "Nothing".
+// de probabilidade exclusiva; todo o restante corresponde a "Nada".
 function renderAcquisitions() {
   acquiredRows.replaceChildren();
   if (!acquisitions.length) {
@@ -118,7 +118,8 @@ function renderAcquisitions() {
     acquiredRows.append(row);
     return;
   }
-  for (const acquisition of acquisitions) {
+  // Keep the table compact so the chest button never gets pushed down.
+  for (const acquisition of acquisitions.slice(0, 6)) {
     const row = document.createElement('tr');
     const name = document.createElement('td');
     name.className = 'acquired-name';
@@ -175,7 +176,7 @@ function openChest() {
     history.unshift('🎉 ' + won.name);
   } else {
     result.textContent = 'Nothing this time... Try again!';
-    history.unshift('Nothing');
+    history.unshift('Nada');
   }
 
   history = history.slice(0, 8);
